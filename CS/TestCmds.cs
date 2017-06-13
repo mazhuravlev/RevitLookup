@@ -211,6 +211,71 @@ namespace RevitLookup
         }
     }
 
+    [Transaction(TransactionMode.Manual)]
+    [Regeneration(RegenerationOption.Manual)]
+    public class CmdSnoopById : IExternalCommand
+    {
+        public Result Execute(ExternalCommandData cmdData, ref string msg, ElementSet elems)
+        {
+            Result result;
+
+            try
+            {
+                Snoop.CollectorExts.CollectorExt.m_app = cmdData.Application;
+                UIDocument revitDoc = cmdData.Application.ActiveUIDocument;
+                Document dbdoc = revitDoc.Document;
+                Snoop.CollectorExts.CollectorExt.m_activeDoc = dbdoc; // TBD: see note in CollectorExt.cs
+                Autodesk.Revit.DB.View view = dbdoc.ActiveView;
+
+                //ElementSet ss = cmdData.Application.ActiveUIDocument.Selection.Elements; // 2015, jeremy: 'Selection.Selection.Elements' is obsolete: 'This property is deprecated in Revit 2015. Use GetElementIds() and SetElementIds instead.'
+                //if (ss.Size == 0)
+                //{
+                //  FilteredElementCollector collector = new FilteredElementCollector( revitDoc.Document, view.Id );
+                //  collector.WhereElementIsNotElementType();
+                //  FilteredElementIterator i = collector.GetElementIterator();
+                //  i.Reset();
+                //  ElementSet ss1 = cmdData.Application.Application.Create.NewElementSet();
+                //  while( i.MoveNext() )
+                //  {
+                //    Element e = i.Current as Element;
+                //    ss1.Insert( e );
+                //  }
+                //  ss = ss1;
+                //}
+
+                var input = Microsoft.VisualBasic.Interaction.InputBox("Enter element id:");
+                if(string.IsNullOrEmpty(input)) return Result.Cancelled;
+                int elementIdInt;
+                if (!int.TryParse(input, out elementIdInt))
+                {
+                    msg = "Element id must be an integer";
+                    return Result.Failed;
+                }
+                var elementId = new ElementId(elementIdInt);
+                var element = revitDoc.Document.GetElement(elementId);
+                if (element == null)
+                {
+                    msg = $"Element with id = {elementIdInt} not found";
+                    return Result.Failed;
+                }
+                ICollection<ElementId> ids = new List<ElementId> {elementId};
+               
+                Snoop.Forms.Objects form = new Snoop.Forms.Objects(dbdoc, ids);
+                ActiveDoc.UIApp = cmdData.Application;
+                form.ShowDialog();
+
+                result = Result.Succeeded;
+            }
+            catch (System.Exception e)
+            {
+                msg = e.Message;
+                result = Result.Failed;
+            }
+
+            return result;
+        }
+    }
+
     /// <summary>
     /// Snoop App command:  Browse all objects that are part of the Application object
     /// </summary>
