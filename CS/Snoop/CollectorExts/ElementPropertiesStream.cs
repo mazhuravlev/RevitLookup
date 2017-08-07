@@ -56,13 +56,25 @@ namespace RevitLookup.Snoop.CollectorExts
 
             try
             {
+                var name = pi.Name;
                 object propertyValue;
                 if (pi.Name == "Geometry")
-                    propertyValue = pi.GetValue(elem, new object[1] {new Options()});
+                    propertyValue = pi.GetValue(elem, new object[1] { new Options() });
                 else if (pi.Name == "BoundingBox")
-                    propertyValue = pi.GetValue(elem, new object[1] {application.ActiveUIDocument.ActiveView});
+                    propertyValue = pi.GetValue(elem, new object[1] { application.ActiveUIDocument.ActiveView });
                 else if (pi.Name == "Parameter")
                     return;
+                else if (pi.Name == "TagText")
+                {
+                    try
+                    {
+                        propertyValue = pi.GetValue(elem);
+                    }
+                    catch (Exception e)
+                    {
+                        return;
+                    }
+                }
                 else
                     propertyValue = pi.GetValue(elem);
 
@@ -71,11 +83,11 @@ namespace RevitLookup.Snoop.CollectorExts
                 var category = elem as Category;
                 if (category != null && pi.Name == "Id" && category.Id.IntegerValue < 0)
                 {
-                    var bic = (BuiltInCategory) category.Id.IntegerValue;
+                    var bic = (BuiltInCategory)category.Id.IntegerValue;
 
                     data.Add(new Snoop.Data.String("BuiltInCategory", bic.ToString()));
                 }
-                    
+
             }
             catch (TargetException ex)
             {
@@ -88,6 +100,14 @@ namespace RevitLookup.Snoop.CollectorExts
             catch (TargetParameterCountException ex)
             {
                 data.Add(new Snoop.Data.Exception(pi.Name, ex));
+            }
+            catch (Exception ex)
+            {
+                var a = 1;
+            }
+            catch
+            {
+                var a = 1;
             }
         }
     }

@@ -80,10 +80,12 @@ namespace RevitLookup
       // Add Icons to main RevitLookup Menu
       optionsBtn.Image = GetEmbeddedImage("RevitLookup.Resources.RLookup-16.png");
       optionsBtn.LargeImage = GetEmbeddedImage("RevitLookup.Resources.RLookup-32.png");
-
+        var pbd = new PushButtonData("Snoop Current Selection...", "Snoop Current Selection...", ExecutingAssemblyPath,
+            "RevitLookup.CmdSnoopModScope");
+        pbd.AvailabilityClassName = "RevitLookup.MyExternalCommandAvailability";
       optionsBtn.AddPushButton( new PushButtonData( "HelloWorld", "Hello World...", ExecutingAssemblyPath, "RevitLookup.HelloWorld" ) );
       optionsBtn.AddPushButton( new PushButtonData( "Snoop Db..", "Snoop DB...", ExecutingAssemblyPath, "RevitLookup.CmdSnoopDb" ) );
-      optionsBtn.AddPushButton( new PushButtonData( "Snoop Current Selection...", "Snoop Current Selection...", ExecutingAssemblyPath, "RevitLookup.CmdSnoopModScope" ) );
+        rvtRibbonPanel.AddItem( pbd);
       optionsBtn.AddPushButton(new PushButtonData("Snoop by ID...", "Snoop by ID...", ExecutingAssemblyPath, "RevitLookup.CmdSnoopById"));
       optionsBtn.AddPushButton( new PushButtonData( "Snoop Active View...", "Snoop Active View...", ExecutingAssemblyPath, "RevitLookup.CmdSnoopActiveView" ) );
       optionsBtn.AddPushButton( new PushButtonData( "Snoop Application...", "Snoop Application...", ExecutingAssemblyPath, "RevitLookup.CmdSnoopApp" ) );
@@ -115,4 +117,12 @@ namespace RevitLookup
       }
     }
   }
+
+    public class MyExternalCommandAvailability : IExternalCommandAvailability
+    {
+        public bool IsCommandAvailable(UIApplication applicationData, CategorySet selectedCategories)
+        {
+            return true;
+        }
+    }
 }
